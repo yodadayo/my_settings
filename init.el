@@ -226,7 +226,6 @@
         ("melpa" . "http://melpa.org/packages/")
         ("org" . "http://orgmode.org/elpa/")))
 
-
 ;;
 ;; For emacs-mozc
 ;;
@@ -240,3 +239,74 @@
 ;; tab settings
 (setq default-tab-width 2)
 
+;;
+;; For company-mode
+;;
+(when (locate-library "company")
+  (global-company-mode 1)
+  (global-set-key (kbd "C-M-i") 'company-complete)
+  ;; (setq company-idle-delay nil) ; 自動補完をしない
+  (define-key company-active-map (kbd "C-n") 'company-select-next)
+  (define-key company-active-map (kbd "C-p") 'company-select-previous)
+  (define-key company-search-map (kbd "C-n") 'company-select-next)
+  (define-key company-search-map (kbd "C-p") 'company-select-previous)
+  (define-key company-active-map (kbd "<tab>") 'company-complete-selection)
+	(define-key company-active-map (kbd "C-h") 'delete-backward-char))
+
+;;
+;;
+;; 
+
+(use-package flycheck
+  :config
+  (progn
+    (add-hook 'flycheck-mode-hook #'flycheck-irony-setup)
+    )
+  )
+
+(use-package cmake-ide
+  :bind
+  (("<f9>" . cmake-ide-compile))
+  :config
+  (progn
+    (setq 
+     ; rdm & rcコマンドへのパス。コマンドはRTagsのインストール・ディレクトリ下。
+     cmake-ide-rdm-executable "path_to_rdm"
+     cmake-ide-rc-executable  "path_to_rc"
+     )
+    )
+  )
+
+(defun my-irony-mode-hook ()
+  (define-key irony-mode-map
+    [remap completion-at-point]
+    'irony-completion-at-point-async)
+  (define-key irony-mode-map
+    [remap complete-symbol]
+    'irony-completion-at-point-async)
+  )
+
+(use-package irony
+  :config
+  (progn
+    ; ironyのビルド&インストール時にCMAKE_INSTALL_PREFIXで指定したディレクトリへのパス。
+    (setq irony-server-install-prefix "/home/walker/.emacs.d/irony/")
+    (add-hook 'irony-mode-hook 'company-irony-setup-begin-commands)
+    (add-hook 'irony-mode-hook 'my-irony-mode-hook)
+    (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
+    (add-hook 'irony-mode-hook 'irony-eldoc)
+		(with-eval-after-load 'company
+			(add-to-list 'company-backends 'company-irony))
+    )
+  )
+
+(add-hook 'c-mode-common-hook 'flycheck-mode)
+(add-hook 'c-mode-hook 'irony-mode)
+(add-hook 'c++-mode-hook      'irony-mode)
+
+
+(eval-after-load "yasnippet"
+  '(progn
+     ;; companyと競合するのでyasnippetのフィールド移動は "C-i" のみにする
+     (define-key yas-keymap (kbd "<tab>") nil)
+     (yas-global-mode 1)))
