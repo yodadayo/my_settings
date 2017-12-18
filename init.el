@@ -310,3 +310,20 @@
      ;; companyと競合するのでyasnippetのフィールド移動は "C-i" のみにする
      (define-key yas-keymap (kbd "<tab>") nil)
      (yas-global-mode 1)))
+
+;;
+;; for markdown
+;;
+
+(use-package markdown-mode
+  :ensure t
+  :commands (markdown-mode gfm-mode)
+  :mode (("README\\.md\\'" . gfm-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :init (setq markdown-command "pandoc -s --self-contained --mathml -t html5 -c ~/.pandoc/github.css"))
+;; :init (setq markdown-command "pandoc -s --mathml"))
+(require 'flymd)
+(add-hook 'markdown-mode-hook
+          '(lambda ()
+             (define-key markdown-mode-map (kbd "C-c C-w w") 'flymd-flyit)))

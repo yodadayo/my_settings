@@ -1,2 +1,2 @@
 # my_settings
-here is files of ~/.emacs.d/init.el and ~/.zshrc
+here is  the files of ~/.emacs.d/init.el and ~/.zshrc
